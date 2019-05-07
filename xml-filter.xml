@@ -1,0 +1,61 @@
+<Map background-color="transparent" minimum-version="0.7.2" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over">
+   
+   <Style name="data_style">
+      <Rule>
+         <Filter>[Data] &gt;= 0 and [Data] &lt; 1</Filter>
+         <PolygonSymbolizer fill="#c7e9b4" />
+         <!--<MinScaleDenominator>: minimum map scale at which this rule applies
+         <MaxScaleDenominator>: maximum map scale at which this rule applies
+         <Filter>: optionally apply based on attribute value
+         <ElseFilter>: optionally apply based on attribute value
+         <PointSymbolizer> (Similar to MarkersSymbolizer, see #2115)
+         <LineSymbolizer>
+         <LinePatternSymbolizer>
+         <MarkersSymbolizer>
+         <ShieldSymbolizer>
+         <PolygonSymbolizer>
+         <PolygonPatternSymbolizer>
+         <TextSymbolizer>
+         <RasterSymbolizer>
+         <BuildingSymbolizer>
+         <GroupSymbolizer>
+         <DebugSymbolizer>-->
+      </Rule>
+      
+      <Rule>
+         <Filter>[Data] &gt;= 1 and [Data] &lt; 2</Filter>
+         <PolygonSymbolizer fill="#7fcdbb" />
+      </Rule>
+      
+      <Rule>
+         <Filter>[Data] &gt;= 2 and [Data] &lt; 3</Filter>
+         <PolygonSymbolizer fill="#1d91c0" />
+      </Rule>
+      
+      <Rule>
+         <Filter>[Data] &gt;= 3 and [Data] &lt; 4</Filter>
+         <PolygonSymbolizer fill="#41b6c3" />
+      </Rule>
+      
+      <Rule>
+         <Filter>[Data] &gt;= 4 and [Data] &lt; 4.6</Filter>
+         <PolygonSymbolizer fill="#225ea8" />
+      </Rule>
+            
+      <Rule>
+         <ElseFilter />
+         <PolygonSymbolizer fill="darkred" />
+      </Rule>
+   </Style>
+
+   <Layer name="data_layer" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over">
+      <StyleName>data_style</StyleName>
+      <Datasource>
+         <Parameter name="type">shape</Parameter>
+         <Parameter name="estimate_extent">true</Parameter>
+         <Parameter name="file">seis_cells</Parameter>
+         <Parameter name="base">../data</Parameter>
+      </Datasource>
+   </Layer>
+
+</Map>
