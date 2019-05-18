@@ -1,3 +1,6 @@
+*.kdev4
+cpp-mapnik
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
