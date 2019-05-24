@@ -12,6 +12,31 @@
 
 using namespace mapnik;
 
+color GetColor(double v, double vmin, double vmax) {
+    color c = color(255, 255, 255); // white
+    double dv;
+    
+    if (v < vmin) v = vmin;
+    if (v > vmax) v = vmax;
+    dv = vmax - vmin;
+    
+    if (v < (vmin + 0.25 * dv)) {
+        c.set_red(0);
+        c.set_green(static_cast<std::uint8_t> (4 * (v - vmin) / dv * 255));
+    } else if (v < (vmin + 0.5 * dv)) {
+        c.set_red(0);
+        c.set_blue(static_cast<std::uint8_t> ((1 + 4 * (vmin + 0.25 * dv - v) / dv) * 255));
+    } else if (v < (vmin + 0.75 * dv)) {
+        c.set_red(static_cast<std::uint8_t> (4 * (v - vmin - 0.5 * dv) / dv * 255));
+        c.set_blue(0);
+    } else {
+        c.set_green(static_cast<std::uint8_t> ((1 + 4 * (vmin + 0.75 * dv - v) / dv) * 255));
+        c.set_blue(0);
+    }
+    
+    return(c);
+}
+
 void save_png(Map m, std::string output_path) {
     image_rgba8 buf(m.width(), m.height());
     agg_renderer<image_rgba8> ren(m, buf);
@@ -54,12 +79,17 @@ int main() {
     double rangeOneColor = (maxData - minData) / colorCount;
     std::cout << "max min " << maxData << " " << minData << " " << rangeOneColor << " data vector len " << myData.size() << std::endl;
     std::vector<double> stops = std::vector<double>(colorCount+1);
-    for (int iStop = 0; iStop < colorCount+1; iStop++)
+    std::vector<color> colors = std::vector<color>(colorCount);
+    for (int iStop = 0; iStop < colorCount; iStop++) {
         stops[iStop] = minData + iStop * rangeOneColor;
-    stops[colorCount] += 1;
+        colors[iStop] = GetColor(stops[iStop], minData, maxData - rangeOneColor);
+    }
+    stops[0] -= 1;
+    stops[colorCount] = maxData + 1;
     
     Map m(1300, 900);
-    //m.set_background(color("white"));
+    m.set_srs(srs_merc);
+    m.set_background(color("white"));
     //load_map(m, xml_path);
     
     feature_type_style world_style;
@@ -80,17 +110,16 @@ int main() {
     wl.add_style("World Style");
     m.add_layer(wl);
     
-    std::vector<double> stop = {0, 1, 2, 3, 4, 4.6};
     feature_type_style s;
-    for (int iColor = 0; iColor < 5; iColor++) {
+    for (int iColor = 0; iColor < colorCount; iColor++) {
         rule r;
         std::ostringstream stringStream;
-        stringStream << "[Data] >= " << stop[iColor] << " and [Data] < " << stop[iColor+1];
+        stringStream << "[Data] >= " << stops[iColor] << " and [Data] < " << stops[iColor+1];
         expression_ptr f = parse_expression(stringStream.str());
         r.set_filter(f);
         polygon_symbolizer psym;
-        psym.properties[keys::fill] = color("red");
-        psym.properties[keys::fill_opacity] = static_cast<double>(iColor+1) / 5;
+        psym.properties[keys::fill] = colors[iColor];
+        //psym.properties[keys::fill_opacity] = static_cast<double>(iColor+1) / colorCount;
         r.append(std::move(psym));
         s.add_rule(std::move(r));
     }
@@ -104,7 +133,7 @@ int main() {
     l.set_srs(srs_merc);
     l.set_datasource(ds);
     l.add_style("data_style");
-    m.add_layer(std::move(l));
+    m.add_layer(l);
     
     m.zoom_all();
     save_png(m, output_path);
